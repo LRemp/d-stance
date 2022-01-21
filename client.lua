@@ -155,6 +155,12 @@ function SetRearCamber(vehicle, angle)
 end
 
 function SaveWheelPreset(vehicle, preset)
+    if Entity(vehicle).state["stance:active"] == nil then
+        Entity(vehicle).state:set("stance:frontWidth_def", GetFrontTrackWidth(vehicle), true)
+        Entity(vehicle).state:set("stance:rearWidth_def", GetRearTrackWidth(vehicle), true)
+        Entity(vehicle).state:set("stance:frontCamber_def", GetFrontCamber(vehicle), true)
+        Entity(vehicle).state:set("stance:rearCamber_def", GetRearCamber(vehicle), true)
+    end
     SetWheelsPreset(vehicle, preset)
     Entity(vehicle).state:set("stance:active", true, true)
     Entity(vehicle).state:set("stance:frontWidth", preset.frontWidth, true)
@@ -214,58 +220,50 @@ function SetWheelsPreset(vehicle, preset)
 end
 
 function GetDefaultWheelPreset(vehicle)
-    local model = GetEntityModel(vehicle)
-    
-    if wheelsMeta[model] == nil then
-        wheelsMeta[model] = GetBaseWheelsPreset(vehicle)
+    if not Entity(vehicle).state["stance:active"] then
+        return GetWheelPreset(vehicle)
     end
-    return wheelsMeta[model]
+    
+    return {
+        frontWidth = state["stance:frontWidth_def"],
+        frontCamber = state["stance:frontCamber_def"],
+        rearWidth = state["stance:rearWidth_def"],
+        rearCamber = state["stance:rearCamber_def"],
+    }
 end
 
 function ResetWheelsPreset(vehicle)
+    if not Entity(vehicle).state["stance:active"] then
+        return
+    end
+
+    Entity(vehicle).state:set("stance:active", false, true)
+    Entity(vehicle).state:set("stance:frontWidth", nil, true)
+    Entity(vehicle).state:set("stance:rearWidth", nil, true)
+    Entity(vehicle).state:set("stance:frontCamber", nil, true)
+    Entity(vehicle).state:set("stance:rearCamber", nil, true)
+    
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
             table.remove(vehicles, i)
         end
     end
-    local wheelType = GetVehicleWheelType(vehicle)
-    local wheelsID = GetVehicleMod(vehicle, 23)
-    SetVehicleWheelType(vehicle, 0)
-    SetVehicleMod(vehicle, 23, -1, false)
-    Wait(50)
-    SetVehicleWheelType(vehicle, wheelType)
-    SetVehicleMod(vehicle, 23, wheelsID, false)
-end
 
-function GetBaseWheelsPreset(vehicle)
-    -- every vehicle has different wheel offsets, in order to get those we can trick it
-    -- by resetting vehicle wheels mod and restoring original values after fetching required ones
-    local coords = GetEntityCoords(vehicle)
-    
-    local wheelType = GetVehicleWheelType(vehicle)
-    local wheelsID = GetVehicleMod(vehicle, 23)
-    SetVehicleWheelType(vehicle, 0)
-    SetVehicleMod(vehicle, 23, -1, false)
-    Wait(50)
-    local data = {
-        frontTrackWidth = GetVehicleWheelXOffset(vehicle, 0),
-        frontCamber = GetVehicleWheelYRotation(vehicle, 0),
-        rearTrackWidth = GetVehicleWheelXOffset(vehicle, 2),
-        rearCamber = GetVehicleWheelYRotation(vehicle, 2),
-        --[[colliderSize = GetVehicleWheelRimColliderSize(vehicle, 0),
-        wheelSize = GetVehicleWheelSize(vehicle),
-        wheelWidth = GetVehicleWheelWidth(vehicle),
-        wheelTireColliderSize = GetVehicleWheelTireColliderSize(vehicle, 0),
-        wheelTireColliderWidth = GetVehicleWheelTireColliderWidth(vehicle, 0)]]
-    }
-    SetVehicleWheelType(vehicle, wheelType)
-    SetVehicleMod(vehicle, 23, wheelsID, false)
-    return data
+    SetFrontTrackWidth(vehicle, Entity(vehicle).state["stance:frontWidth_def"])
+    SetFrontCamber(vehicle, Entity(vehicle).state["stance:frontCamber_def"])
+    SetRearTrackWidth(vehicle, Entity(vehicle).state["stance:rearWidth_def"])
+    SetRearCamber(vehicle, Entity(vehicle).state["stance:rearCamber_def"])
 end
 
 if DEBUG then
     RegisterCommand('stance:data', function()
         local vehicle = GetVehiclePedIsIn(playerPed)
+        PrintWheelsPreset(vehicle)
+    end)
+    
+    RegisterCommand('stance:default', function()
+        local vehicle = GetVehiclePedIsIn(playerPed)
+        ResetWheelsPreset(vehicle)
         PrintWheelsPreset(vehicle)
     end)
     
