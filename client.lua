@@ -77,6 +77,9 @@ function GetFrontTrackWidth(vehicle)
 end
 
 function SetFrontTrackWidth(vehicle, width)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
     SetVehicleWheelXOffset(vehicle, 0, -width)
     SetVehicleWheelXOffset(vehicle, 1, width)
     Entity(vehicle).state:set("stance:active", true, true)
@@ -96,6 +99,9 @@ function GetRearTrackWidth(vehicle)
 end
 
 function SetRearTrackWidth(vehicle, width)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 2, wheelsNum - 1 do
         local value = width
@@ -119,6 +125,9 @@ function GetFrontCamber(vehicle)
 end
 
 function SetFrontCamber(vehicle, value)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
     SetVehicleWheelYRotation(vehicle, 0, -value)
     SetVehicleWheelYRotation(vehicle, 1, value)
     Entity(vehicle).state:set("stance:active", true, true)
@@ -136,6 +145,9 @@ function GetRearCamber(vehicle)
 end
 
 function SetRearCamber(vehicle, angle)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 2, wheelsNum - 1 do
         local value = angle
@@ -155,18 +167,19 @@ function SetRearCamber(vehicle, angle)
 end
 
 function SaveWheelPreset(vehicle, preset)
-    if Entity(vehicle).state["stance:active"] == nil then
-        Entity(vehicle).state:set("stance:frontWidth_def", GetFrontTrackWidth(vehicle), true)
-        Entity(vehicle).state:set("stance:rearWidth_def", GetRearTrackWidth(vehicle), true)
-        Entity(vehicle).state:set("stance:frontCamber_def", GetFrontCamber(vehicle), true)
-        Entity(vehicle).state:set("stance:rearCamber_def", GetRearCamber(vehicle), true)
-    end
     SetWheelsPreset(vehicle, preset)
     Entity(vehicle).state:set("stance:active", true, true)
     Entity(vehicle).state:set("stance:frontWidth", preset.frontWidth, true)
     Entity(vehicle).state:set("stance:rearWidth", preset.rearWidth, true)
     Entity(vehicle).state:set("stance:frontCamber", preset.frontCamber, true)
     Entity(vehicle).state:set("stance:rearCamber", preset.rearCamber, true)
+end
+
+function SaveDefaultWheelPreset(vehicle)
+    Entity(vehicle).state:set("stance:frontWidth_def", GetFrontTrackWidth(vehicle), true)
+    Entity(vehicle).state:set("stance:rearWidth_def", GetRearTrackWidth(vehicle), true)
+    Entity(vehicle).state:set("stance:frontCamber_def", GetFrontCamber(vehicle), true)
+    Entity(vehicle).state:set("stance:rearCamber_def", GetRearCamber(vehicle), true)
 end
 
 function GetWheelsPreset(vehicle)
@@ -189,6 +202,9 @@ function GetWheelsPresetFromStateBag(vehicle)
 end
 
 function SetWheelsPreset(vehicle, preset)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     if preset.frontWidth then
         SetVehicleWheelXOffset(vehicle, 0, -preset.frontWidth)
