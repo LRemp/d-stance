@@ -237,8 +237,9 @@ end
 
 function GetDefaultWheelPreset(vehicle)
     if not Entity(vehicle).state["stance:active"] then
-        return GetWheelPreset(vehicle)
+        return GetWheelsPreset(vehicle)
     end
+    local state = Entity(vehicle).state
     
     return {
         frontWidth = state["stance:frontWidth_def"],
@@ -312,6 +313,7 @@ exports('SetRearTrackWidth', SetRearTrackWidth)
 exports('GetRearCamber', GetRearCamber)
 exports('SetRearCamber', SetRearCamber)
 exports('GetWheelsPresetFromStateBag', GetWheelsPresetFromStateBag)
+exports('GetDefaultWheelPreset', GetDefaultWheelPreset)
 exports('GetWheelsPreset', GetWheelsPreset)
 exports('SetWheelsPreset', SetWheelsPreset)
 exports('SaveWheelPreset', SaveWheelPreset)
