@@ -82,8 +82,8 @@ function SetFrontTrackWidth(vehicle, width)
     end
     SetVehicleWheelXOffset(vehicle, 0, -width)
     SetVehicleWheelXOffset(vehicle, 1, width)
-    Entity(vehicle).state:set("stance:active", true, true)
-    Entity(vehicle).state:set("stance:frontWidth", width, true)
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:frontWidth", width)
     -- if some external resource changes the value it will only appear in the next iteration of vehicles scan
     -- so we force update it to instantly show
     for i = 1, #vehicles do
@@ -110,8 +110,8 @@ function SetRearTrackWidth(vehicle, width)
         end
         SetVehicleWheelXOffset(vehicle, i, value)
     end
-    Entity(vehicle).state:set("stance:active", true, true)
-    Entity(vehicle).state:set("stance:rearWidth", width, true)
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:rearWidth", width)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
             vehicles[i].stance.rearWidth = width
@@ -130,8 +130,8 @@ function SetFrontCamber(vehicle, value)
     end
     SetVehicleWheelYRotation(vehicle, 0, -value)
     SetVehicleWheelYRotation(vehicle, 1, value)
-    Entity(vehicle).state:set("stance:active", true, true)
-    Entity(vehicle).state:set("stance:frontCamber", value, true)  
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:frontCamber", value)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
             vehicles[i].stance.frontCamber = value
@@ -156,8 +156,8 @@ function SetRearCamber(vehicle, angle)
         end
         SetVehicleWheelYRotation(vehicle, i, value)
     end
-    Entity(vehicle).state:set("stance:active", true, true)
-    Entity(vehicle).state:set("stance:rearCamber", angle, true)  
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:rearCamber", angle)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
             vehicles[i].stance.rearCamber = angle
@@ -168,18 +168,18 @@ end
 
 function SaveWheelPreset(vehicle, preset)
     SetWheelsPreset(vehicle, preset)
-    Entity(vehicle).state:set("stance:active", true, true)
-    Entity(vehicle).state:set("stance:frontWidth", preset.frontWidth, true)
-    Entity(vehicle).state:set("stance:rearWidth", preset.rearWidth, true)
-    Entity(vehicle).state:set("stance:frontCamber", preset.frontCamber, true)
-    Entity(vehicle).state:set("stance:rearCamber", preset.rearCamber, true)
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:frontWidth", preset.frontWidth)
+    SetStateBag(vehicle, "stance:rearWidth", preset.rearWidth)
+    SetStateBag(vehicle, "stance:frontCamber", preset.frontCamber)
+    SetStateBag(vehicle, "stance:rearCamber", preset.rearCamber)
 end
 
 function SaveDefaultWheelPreset(vehicle)
-    Entity(vehicle).state:set("stance:frontWidth_def", GetFrontTrackWidth(vehicle), true)
-    Entity(vehicle).state:set("stance:rearWidth_def", GetRearTrackWidth(vehicle), true)
-    Entity(vehicle).state:set("stance:frontCamber_def", GetFrontCamber(vehicle), true)
-    Entity(vehicle).state:set("stance:rearCamber_def", GetRearCamber(vehicle), true)
+    SetStateBag(vehicle, "stance:frontWidth_def", GetFrontTrackWidth(vehicle))
+    SetStateBag(vehicle, "stance:rearWidth_def", GetRearTrackWidth(vehicle))
+    SetStateBag(vehicle, "stance:frontCamber_def", GetFrontCamber(vehicle))
+    SetStateBag(vehicle, "stance:rearCamber_def", GetRearCamber(vehicle))
 end
 
 function GetWheelsPreset(vehicle)
@@ -254,11 +254,11 @@ function ResetWheelsPreset(vehicle)
         return
     end
 
-    Entity(vehicle).state:set("stance:active", false, true)
-    Entity(vehicle).state:set("stance:frontWidth", nil, true)
-    Entity(vehicle).state:set("stance:rearWidth", nil, true)
-    Entity(vehicle).state:set("stance:frontCamber", nil, true)
-    Entity(vehicle).state:set("stance:rearCamber", nil, true)
+    SetStateBag(vehicle, "stance:active", false)
+    SetStateBag(vehicle, "stance:frontWidth", nil)
+    SetStateBag(vehicle, "stance:rearWidth", nil)
+    SetStateBag(vehicle, "stance:frontCamber", nil)
+    SetStateBag(vehicle, "stance:rearCamber", nil)
     
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -270,6 +270,10 @@ function ResetWheelsPreset(vehicle)
     SetFrontCamber(vehicle, Entity(vehicle).state["stance:frontCamber_def"])
     SetRearTrackWidth(vehicle, Entity(vehicle).state["stance:rearWidth_def"])
     SetRearCamber(vehicle, Entity(vehicle).state["stance:rearCamber_def"])
+end
+
+function SetStateBag(vehicle, name, value)
+    TriggerServerEvent('d-stance:server:setStateBag', NetworkGetNetworkIdFromEntity(vehicle), name, value)
 end
 
 if DEBUG then
