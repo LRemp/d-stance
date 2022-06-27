@@ -70,6 +70,7 @@ function PrintWheelsPreset(vehicle)
     print(("[DEBUG] rearWheelTrack %s"):format(GetRearTrackWidth(vehicle)))
     print(("[DEBUG] frontCamber %s"):format(GetFrontCamber(vehicle)))
     print(("[DEBUG] rearCamber %s"):format(GetRearCamber(vehicle)))
+    print(("[DEBUG] suspensionHeight %s"):format(GetVehicleSuspensionHeight(vehicle)))
 end
 
 function GetFrontTrackWidth(vehicle)
@@ -173,13 +174,18 @@ function SaveWheelPreset(vehicle, preset)
     SetStateBag(vehicle, "stance:rearWidth", preset.rearWidth)
     SetStateBag(vehicle, "stance:frontCamber", preset.frontCamber)
     SetStateBag(vehicle, "stance:rearCamber", preset.rearCamber)
+    SetStateBag(vehicle, "stance:suspensionHeight", preset.suspensionHeight)
+    SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
 end
 
 function SaveDefaultWheelPreset(vehicle)
+    if DEBUG then PrintWheelsPreset(vehicle) end
+    SetStateBag(vehicle, "stance:active", true)
     SetStateBag(vehicle, "stance:frontWidth_def", GetFrontTrackWidth(vehicle))
     SetStateBag(vehicle, "stance:rearWidth_def", GetRearTrackWidth(vehicle))
     SetStateBag(vehicle, "stance:frontCamber_def", GetFrontCamber(vehicle))
     SetStateBag(vehicle, "stance:rearCamber_def", GetRearCamber(vehicle))
+    SetStateBag(vehicle, "stance:suspensionHeight_def", preset.suspensionHeight)
 end
 
 function GetWheelsPreset(vehicle)
@@ -188,6 +194,7 @@ function GetWheelsPreset(vehicle)
         frontCamber = GetFrontCamber(vehicle),
         rearWidth = GetRearTrackWidth(vehicle),
         rearCamber = GetRearCamber(vehicle),
+        suspensionHeight = GetVehicleSuspensionHeight(vehicle)
     }
 end
 
@@ -198,6 +205,7 @@ function GetWheelsPresetFromStateBag(vehicle)
         frontCamber = state["stance:frontCamber"],
         rearWidth = state["stance:rearWidth"],
         rearCamber = state["stance:rearCamber"],
+        suspensionHeight = state["stance:suspensionHeight"]
     }
 end
 
@@ -233,6 +241,9 @@ function SetWheelsPreset(vehicle, preset)
             SetVehicleWheelYRotation(vehicle, i, value)
         end
     end
+    if preset.suspensionHeight then
+        SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
+    end
 end
 
 function GetDefaultWheelPreset(vehicle)
@@ -246,6 +257,7 @@ function GetDefaultWheelPreset(vehicle)
         frontCamber = state["stance:frontCamber_def"],
         rearWidth = state["stance:rearWidth_def"],
         rearCamber = state["stance:rearCamber_def"],
+        suspensionHeight = 0.0
     }
 end
 
@@ -259,6 +271,7 @@ function ResetWheelsPreset(vehicle)
     SetStateBag(vehicle, "stance:rearWidth", nil)
     SetStateBag(vehicle, "stance:frontCamber", nil)
     SetStateBag(vehicle, "stance:rearCamber", nil)
+    SetStateBag(vehicle, "stance:suspensionHeight", nil)
     
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -270,6 +283,7 @@ function ResetWheelsPreset(vehicle)
     SetFrontCamber(vehicle, Entity(vehicle).state["stance:frontCamber_def"])
     SetRearTrackWidth(vehicle, Entity(vehicle).state["stance:rearWidth_def"])
     SetRearCamber(vehicle, Entity(vehicle).state["stance:rearCamber_def"])
+    SetVehicleSuspensionHeight(vehicle, 0.0)
 end
 
 function SetStateBag(vehicle, name, value)
@@ -305,6 +319,7 @@ if DEBUG then
         print(("[DEBUG] rearWheelTrack %s"):format(stance.rearWidth))
         print(("[DEBUG] frontCamber %s"):format(stance.frontCamber))
         print(("[DEBUG] rearCamber %s"):format(stance.rearCamber))
+        print(("[DEBUG] suspensionHeight %s"):format(stance.suspensionHeight))
     end)
 end
 
