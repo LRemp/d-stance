@@ -185,6 +185,7 @@ function SaveDefaultWheelPreset(vehicle)
     SetStateBag(vehicle, "stance:rearWidth_def", GetRearTrackWidth(vehicle))
     SetStateBag(vehicle, "stance:frontCamber_def", GetFrontCamber(vehicle))
     SetStateBag(vehicle, "stance:rearCamber_def", GetRearCamber(vehicle))
+    SetStateBag(vehicle, "stance:suspensionHeight_def", preset.suspensionHeight)
 end
 
 function GetWheelsPreset(vehicle)
@@ -239,6 +240,9 @@ function SetWheelsPreset(vehicle, preset)
             end
             SetVehicleWheelYRotation(vehicle, i, value)
         end
+    end
+    if preset.suspensionHeight then
+        SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
     end
 end
 
