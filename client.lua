@@ -141,6 +141,24 @@ function SetFrontCamber(vehicle, value)
     end
 end
 
+function GetSuspensionHeight(vehicle)
+    return GetVehicleSuspensionHeight(vehicle)
+end
+
+function SetSuspensionHeight(vehicle, value)
+    if Entity(vehicle).state["stance:active"] == nil then
+        SaveDefaultWheelPreset(vehicle)
+    end
+    SetStateBag(vehicle, "stance:active", true)
+    SetStateBag(vehicle, "stance:suspensionHeight", value)
+    for i = 1, #vehicles do
+        if vehicles[i].id == vehicle then
+            vehicles[i].stance.suspensionHeight = value
+            break
+        end
+    end
+end
+
 function GetRearCamber(vehicle)
     return GetVehicleWheelYRotation(vehicle, 3)
 end
@@ -185,7 +203,7 @@ function SaveDefaultWheelPreset(vehicle)
     SetStateBag(vehicle, "stance:rearWidth_def", GetRearTrackWidth(vehicle))
     SetStateBag(vehicle, "stance:frontCamber_def", GetFrontCamber(vehicle))
     SetStateBag(vehicle, "stance:rearCamber_def", GetRearCamber(vehicle))
-    SetStateBag(vehicle, "stance:suspensionHeight_def", preset.suspensionHeight)
+    SetStateBag(vehicle, "stance:suspensionHeight_def", GetVehicleSuspensionHeight(vehicle))
 end
 
 function GetWheelsPreset(vehicle)
@@ -327,6 +345,8 @@ exports('GetFrontTrackWidth', GetFrontTrackWidth)
 exports('SetFrontTrackWidth', SetFrontTrackWidth)
 exports('GetFrontCamber', GetFrontCamber)
 exports('SetFrontCamber', SetFrontCamber)
+exports('GetSuspensionHeight', GetSuspensionHeight)
+exports('SetSuspensionHeight', SetSuspensionHeight)
 exports('GetRearTrackWidth', GetRearTrackWidth)
 exports('SetRearTrackWidth', SetRearTrackWidth)
 exports('GetRearCamber', GetRearCamber)
