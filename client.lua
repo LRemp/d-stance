@@ -54,6 +54,7 @@ CreateThread(function()
     end
 end)
 
+---@param vehicle number
 function PrintWheelsData(vehicle)
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 0, wheelsNum - 1 do
@@ -65,6 +66,7 @@ function PrintWheelsData(vehicle)
     end
 end
 
+---@param vehicle number
 function PrintWheelsPreset(vehicle)
     print(("[DEBUG] frontWheelTrack %s"):format(GetFrontTrackWidth(vehicle)))
     print(("[DEBUG] rearWheelTrack %s"):format(GetRearTrackWidth(vehicle)))
@@ -73,10 +75,14 @@ function PrintWheelsPreset(vehicle)
     print(("[DEBUG] suspensionHeight %s"):format(GetVehicleSuspensionHeight(vehicle)))
 end
 
+---@param vehicle number
+---@return offset number
 function GetFrontTrackWidth(vehicle)
     return GetVehicleWheelXOffset(vehicle, 1)
 end
 
+---@param vehicle number
+---@param width number
 function SetFrontTrackWidth(vehicle, width)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -95,10 +101,14 @@ function SetFrontTrackWidth(vehicle, width)
     end
 end
 
+---@param vehicle number
+---@return offset number
 function GetRearTrackWidth(vehicle)
     return GetVehicleWheelXOffset(vehicle, 3)
 end
 
+---@param vehicle number
+---@param width number
 function SetRearTrackWidth(vehicle, width)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -121,10 +131,14 @@ function SetRearTrackWidth(vehicle, width)
     end
 end
 
+---@param vehicle number
+---@return rotation number
 function GetFrontCamber(vehicle)
     return GetVehicleWheelYRotation(vehicle, 1)
 end
 
+---@param vehicle number
+---@param angle number
 function SetFrontCamber(vehicle, value)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -141,10 +155,14 @@ function SetFrontCamber(vehicle, value)
     end
 end
 
+---@param vehicle number
+---@return height number
 function GetSuspensionHeight(vehicle)
     return GetVehicleSuspensionHeight(vehicle)
 end
 
+---@param vehicle number
+---@param height number
 function SetSuspensionHeight(vehicle, value)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -159,10 +177,14 @@ function SetSuspensionHeight(vehicle, value)
     end
 end
 
+---@param vehicle number
+---@return rotation number
 function GetRearCamber(vehicle)
     return GetVehicleWheelYRotation(vehicle, 3)
 end
 
+---@param vehicle number
+---@param angle number
 function SetRearCamber(vehicle, angle)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -185,6 +207,8 @@ function SetRearCamber(vehicle, angle)
     end
 end
 
+---@param vehicle number
+---@param preset table
 function SaveWheelPreset(vehicle, preset)
     SetWheelsPreset(vehicle, preset)
     SetStateBag(vehicle, "stance:active", true)
@@ -196,6 +220,7 @@ function SaveWheelPreset(vehicle, preset)
     SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
 end
 
+---@param vehicle number
 function SaveDefaultWheelPreset(vehicle)
     if DEBUG then PrintWheelsPreset(vehicle) end
     SetStateBag(vehicle, "stance:active", true)
@@ -206,6 +231,8 @@ function SaveDefaultWheelPreset(vehicle)
     SetStateBag(vehicle, "stance:suspensionHeight_def", GetVehicleSuspensionHeight(vehicle))
 end
 
+---@param vehicle number
+---@return data table
 function GetWheelsPreset(vehicle)
     return {
         frontWidth = GetFrontTrackWidth(vehicle),
@@ -216,6 +243,8 @@ function GetWheelsPreset(vehicle)
     }
 end
 
+---@param vehicle number
+---@return data table
 function GetWheelsPresetFromStateBag(vehicle)
     local state = Entity(vehicle).state
     return {
@@ -227,6 +256,8 @@ function GetWheelsPresetFromStateBag(vehicle)
     }
 end
 
+---@param vehicle number
+---@param preset table
 function SetWheelsPreset(vehicle, preset)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -264,6 +295,8 @@ function SetWheelsPreset(vehicle, preset)
     end
 end
 
+---@param vehicle number
+---@return data table
 function GetDefaultWheelPreset(vehicle)
     if not Entity(vehicle).state["stance:active"] then
         return GetWheelsPreset(vehicle)
@@ -279,6 +312,7 @@ function GetDefaultWheelPreset(vehicle)
     }
 end
 
+---@param vehicle number
 function ResetWheelsPreset(vehicle)
     if not Entity(vehicle).state["stance:active"] then
         return
