@@ -16,3 +16,5 @@ server_scripts {
     'config.lua',
     'server.lua'
 }
+
+ui_page 'http://localhost:5173/'

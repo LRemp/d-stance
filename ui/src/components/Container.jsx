@@ -1,8 +1,11 @@
 import React from 'react'
+import Dialog from './Dialog'
 
 function Container() {
   return (
-    <div>Container</div>
+    <div className='Container'>
+        <Dialog />
+    </div>
   )
 }
 

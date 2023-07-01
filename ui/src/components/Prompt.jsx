@@ -2,7 +2,7 @@ import React from 'react'
 
 function Prompt() {
   return (
-    <div>Prompt</div>
+    <div className='Prompt'>Prompt</div>
   )
 }
 
@@ -11,7 +11,7 @@ export default Prompt
 function Option() {
     return (
         <div>
-            
+
         </div>
     )
 }

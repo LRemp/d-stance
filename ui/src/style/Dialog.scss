@@ -1,0 +1,81 @@
+.Dialog {
+    width: 25%;
+    background-color: rgba(0,0,0,0.85);
+    color: white;
+    padding: 10px 20px;
+
+    .Header {
+        font-size: 4vh;
+    }
+
+    .Stage {
+        width: 100%;
+
+        &--active {
+            background-color: white;
+            color: black;
+        }
+
+        .Title {
+            text-align: center;
+
+            &--active {
+                color: black;
+            }
+        }
+
+        .Meter {
+
+            margin: .5vh 0;
+            height: 14px;
+            display: grid;
+
+            .Bar {
+                margin: auto;
+                width: calc(100% - 14px);
+                height: 2px;
+                background-color: white;
+
+                &--active {
+                    background-color: black;
+                }
+            }
+
+            .Cursor {
+                position: absolute;
+                transform: translateX(calc(2.05vw * 5));
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background-color: white;
+
+                &--active {
+                    background-color: black;
+                }
+            }
+
+            .Columns {
+                display: grid;
+                grid-auto-flow: column;
+                place-content: space-between;
+                transform: translateY(-40%);
+
+                .Column {
+                    width: 2px;
+                    height: 10px;
+                    background-color: white;
+                    
+                    &--active {
+                        background-color: black;
+                    }
+                }
+            }
+        }
+
+        .Label {
+            &.Right {
+                float: right;
+            }
+        }
+    }
+}
