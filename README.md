@@ -1,4 +1,5 @@
-# d-stance
+![](https://i.imgur.com/eoNe4Ln.jpg)
+
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![](https://dcbadge.vercel.app/api/server/RTs4VvAw3C?style=flat)
 
