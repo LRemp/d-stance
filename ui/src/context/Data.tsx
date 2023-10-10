@@ -16,7 +16,6 @@ const DataContextProvider: React.FC<ComponentProps> = ({ children }) => {
   }
   const loadConfiguration = (data: Array<StanceOption>) => {
     const options: any = []
-    console.log(data)
     data.map((option: StanceOption) => options.push({ 
       id: option.id,
       name: option.name,
@@ -26,7 +25,7 @@ const DataContextProvider: React.FC<ComponentProps> = ({ children }) => {
   }
   const setVisible = (value: boolean) => setData((state) => ({ ...state, visible: value }))
   const [data, setData] = React.useState({
-    visible: true,
+    visible: false,
     setVisible,
     stanceOptions: [
       {

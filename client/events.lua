@@ -1,6 +1,6 @@
 RegisterNuiCallback('set-value', function(data, cb)
     local defaultValues = GetDefaultWheelPreset(Vehicle)
-    print(json.encode(defaultValues))
+
     if data.id == "frontCamber" then
         SetFrontCamber(Vehicle, defaultValues.frontCamber + Config.Limits.frontCamber * data.value)
     elseif data.id == "rearCamber" then
