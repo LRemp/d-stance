@@ -1,6 +1,11 @@
 local vehicles = {}
 local wheelsMeta = {}
 
+Vehicle = nil
+
+Locale.Load()
+LoadStanceConfiguration()
+
 local PlayerPedId = PlayerPedId
 local GetEntityCoords = GetEntityCoords
 local GetGamePool = GetGamePool
@@ -23,7 +28,7 @@ CreateThread(function()
                 SetWheelsPreset(vehicles[i].id, vehicles[i].stance)
             end
         end
-        Wait(20)
+        Wait(3)
     end
 end)
 
@@ -41,7 +46,7 @@ CreateThread(function()
             if stanceActive then
                 local distance = #(GetEntityCoords(vehiclesPool[i]) - coords)
                 -- checking if vehicle is in distance 
-                if distance < 100.0 then
+                if distance < Config.RenderDistance then
                     vehiclesList[#vehiclesList + 1] = {
                         id = vehiclesPool[i],
                         stance = GetWheelsPresetFromStateBag(vehiclesPool[i])
@@ -50,10 +55,11 @@ CreateThread(function()
             end
         end
         vehicles = vehiclesList
-        Wait(2000)
+        Wait(Config.UpdateRate)
     end
 end)
 
+---@param vehicle number
 function PrintWheelsData(vehicle)
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 0, wheelsNum - 1 do
@@ -65,6 +71,7 @@ function PrintWheelsData(vehicle)
     end
 end
 
+---@param vehicle number
 function PrintWheelsPreset(vehicle)
     print(("[DEBUG] frontWheelTrack %s"):format(GetFrontTrackWidth(vehicle)))
     print(("[DEBUG] rearWheelTrack %s"):format(GetRearTrackWidth(vehicle)))
@@ -73,17 +80,20 @@ function PrintWheelsPreset(vehicle)
     print(("[DEBUG] suspensionHeight %s"):format(GetVehicleSuspensionHeight(vehicle)))
 end
 
+---@param vehicle number
+---@return offset number
 function GetFrontTrackWidth(vehicle)
     return GetVehicleWheelXOffset(vehicle, 1)
 end
 
+---@param vehicle number
+---@param width number
 function SetFrontTrackWidth(vehicle, width)
-    if Entity(vehicle).state["stance:active"] == nil then
-        SaveDefaultWheelPreset(vehicle)
-    end
+    EnsureStanceStateBag(vehicle)
+
     SetVehicleWheelXOffset(vehicle, 0, -width)
     SetVehicleWheelXOffset(vehicle, 1, width)
-    SetStateBag(vehicle, "stance:active", true)
+
     SetStateBag(vehicle, "stance:frontWidth", width)
     -- if some external resource changes the value it will only appear in the next iteration of vehicles scan
     -- so we force update it to instantly show
@@ -95,14 +105,17 @@ function SetFrontTrackWidth(vehicle, width)
     end
 end
 
+---@param vehicle number
+---@return offset number
 function GetRearTrackWidth(vehicle)
     return GetVehicleWheelXOffset(vehicle, 3)
 end
 
+---@param vehicle number
+---@param width number
 function SetRearTrackWidth(vehicle, width)
-    if Entity(vehicle).state["stance:active"] == nil then
-        SaveDefaultWheelPreset(vehicle)
-    end
+    EnsureStanceStateBag(vehicle)
+
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 2, wheelsNum - 1 do
         local value = width
@@ -111,7 +124,7 @@ function SetRearTrackWidth(vehicle, width)
         end
         SetVehicleWheelXOffset(vehicle, i, value)
     end
-    SetStateBag(vehicle, "stance:active", true)
+
     SetStateBag(vehicle, "stance:rearWidth", width)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -121,17 +134,20 @@ function SetRearTrackWidth(vehicle, width)
     end
 end
 
+---@param vehicle number
+---@return rotation number
 function GetFrontCamber(vehicle)
     return GetVehicleWheelYRotation(vehicle, 1)
 end
 
+---@param vehicle number
+---@param angle number
 function SetFrontCamber(vehicle, value)
-    if Entity(vehicle).state["stance:active"] == nil then
-        SaveDefaultWheelPreset(vehicle)
-    end
+    EnsureStanceStateBag(vehicle)
+
     SetVehicleWheelYRotation(vehicle, 0, -value)
     SetVehicleWheelYRotation(vehicle, 1, value)
-    SetStateBag(vehicle, "stance:active", true)
+
     SetStateBag(vehicle, "stance:frontCamber", value)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -141,15 +157,17 @@ function SetFrontCamber(vehicle, value)
     end
 end
 
+---@param vehicle number
+---@return height number
 function GetSuspensionHeight(vehicle)
     return GetVehicleSuspensionHeight(vehicle)
 end
 
+---@param vehicle number
+---@param height number
 function SetSuspensionHeight(vehicle, value)
-    if Entity(vehicle).state["stance:active"] == nil then
-        SaveDefaultWheelPreset(vehicle)
-    end
-    SetStateBag(vehicle, "stance:active", true)
+    EnsureStanceStateBag(vehicle)
+
     SetStateBag(vehicle, "stance:suspensionHeight", value)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -159,14 +177,17 @@ function SetSuspensionHeight(vehicle, value)
     end
 end
 
+---@param vehicle number
+---@return rotation number
 function GetRearCamber(vehicle)
     return GetVehicleWheelYRotation(vehicle, 3)
 end
 
+---@param vehicle number
+---@param angle number
 function SetRearCamber(vehicle, angle)
-    if Entity(vehicle).state["stance:active"] == nil then
-        SaveDefaultWheelPreset(vehicle)
-    end
+    EnsureStanceStateBag(vehicle)
+
     local wheelsNum = GetVehicleNumberOfWheels(vehicle)
     for i = 2, wheelsNum - 1 do
         local value = angle
@@ -175,7 +196,7 @@ function SetRearCamber(vehicle, angle)
         end
         SetVehicleWheelYRotation(vehicle, i, value)
     end
-    SetStateBag(vehicle, "stance:active", true)
+
     SetStateBag(vehicle, "stance:rearCamber", angle)
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -185,6 +206,26 @@ function SetRearCamber(vehicle, angle)
     end
 end
 
+function SetWheelsSize(vehicle, size)
+    EnsureStanceStateBag(vehicle)
+
+    SetStateBag(vehicle, "stance:wheelSize", size)
+    for i = 1, #vehicles do
+        if vehicles[i].id == vehicle then
+            vehicles[i].stance.wheelSize = size
+            break
+        end
+    end
+    
+    SetVehicleWheelSize(vehicle, size)
+    for i = 0, 4 do
+        SetVehicleWheelTireColliderSize(vehicle, i, size)
+        SetVehicleWheelRimColliderSize(vehicle, i, size)
+    end
+end
+
+---@param vehicle number
+---@param preset table
 function SaveWheelPreset(vehicle, preset)
     SetWheelsPreset(vehicle, preset)
     SetStateBag(vehicle, "stance:active", true)
@@ -193,9 +234,11 @@ function SaveWheelPreset(vehicle, preset)
     SetStateBag(vehicle, "stance:frontCamber", preset.frontCamber)
     SetStateBag(vehicle, "stance:rearCamber", preset.rearCamber)
     SetStateBag(vehicle, "stance:suspensionHeight", preset.suspensionHeight)
+    SetStateBag(vehicle, "stance:wheelSize", preset.wheelSize)
     SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
 end
 
+---@param vehicle number
 function SaveDefaultWheelPreset(vehicle)
     if DEBUG then PrintWheelsPreset(vehicle) end
     SetStateBag(vehicle, "stance:active", true)
@@ -204,18 +247,24 @@ function SaveDefaultWheelPreset(vehicle)
     SetStateBag(vehicle, "stance:frontCamber_def", GetFrontCamber(vehicle))
     SetStateBag(vehicle, "stance:rearCamber_def", GetRearCamber(vehicle))
     SetStateBag(vehicle, "stance:suspensionHeight_def", GetVehicleSuspensionHeight(vehicle))
+    SetStateBag(vehicle, "stance:wheelSize_def", GetVehicleWheelSize(vehicle))
 end
 
+---@param vehicle number
+---@return data table
 function GetWheelsPreset(vehicle)
     return {
         frontWidth = GetFrontTrackWidth(vehicle),
         frontCamber = GetFrontCamber(vehicle),
         rearWidth = GetRearTrackWidth(vehicle),
         rearCamber = GetRearCamber(vehicle),
-        suspensionHeight = GetVehicleSuspensionHeight(vehicle)
+        suspensionHeight = GetVehicleSuspensionHeight(vehicle),
+        wheelSize = GetVehicleWheelSize(vehicle)
     }
 end
 
+---@param vehicle number
+---@return data table
 function GetWheelsPresetFromStateBag(vehicle)
     local state = Entity(vehicle).state
     return {
@@ -223,10 +272,13 @@ function GetWheelsPresetFromStateBag(vehicle)
         frontCamber = state["stance:frontCamber"],
         rearWidth = state["stance:rearWidth"],
         rearCamber = state["stance:rearCamber"],
-        suspensionHeight = state["stance:suspensionHeight"]
+        suspensionHeight = state["stance:suspensionHeight"],
+        wheelSize = state["stance:wheelSize"]
     }
 end
 
+---@param vehicle number
+---@param preset table
 function SetWheelsPreset(vehicle, preset)
     if Entity(vehicle).state["stance:active"] == nil then
         SaveDefaultWheelPreset(vehicle)
@@ -262,8 +314,18 @@ function SetWheelsPreset(vehicle, preset)
     if preset.suspensionHeight then
         SetVehicleSuspensionHeight(vehicle, preset.suspensionHeight)
     end
+    if preset.wheelSize then
+        SetVehicleWheelSize(vehicle, preset.wheelSize)
+        for i = 0, 4 do
+            SetVehicleWheelTireColliderSize(vehicle, i, preset.wheelSize / 2)
+            SetVehicleWheelRimColliderSize(vehicle, i, preset.wheelSize)
+            --SetVehicleWheelTireColliderWidth(vehicle, i, preset.wheelSize / 2)
+        end
+    end
 end
 
+---@param vehicle number
+---@return data table
 function GetDefaultWheelPreset(vehicle)
     if not Entity(vehicle).state["stance:active"] then
         return GetWheelsPreset(vehicle)
@@ -275,10 +337,12 @@ function GetDefaultWheelPreset(vehicle)
         frontCamber = state["stance:frontCamber_def"],
         rearWidth = state["stance:rearWidth_def"],
         rearCamber = state["stance:rearCamber_def"],
-        suspensionHeight = 0.0
+        suspensionHeight = 0.0,
+        wheelSize = state["stance:wheelSize_def"]
     }
 end
 
+---@param vehicle number
 function ResetWheelsPreset(vehicle)
     if not Entity(vehicle).state["stance:active"] then
         return
@@ -290,6 +354,7 @@ function ResetWheelsPreset(vehicle)
     SetStateBag(vehicle, "stance:frontCamber", nil)
     SetStateBag(vehicle, "stance:rearCamber", nil)
     SetStateBag(vehicle, "stance:suspensionHeight", nil)
+    SetStateBag(vehicle, "stance:wheelSize", nil)
     
     for i = 1, #vehicles do
         if vehicles[i].id == vehicle then
@@ -301,6 +366,7 @@ function ResetWheelsPreset(vehicle)
     SetFrontCamber(vehicle, Entity(vehicle).state["stance:frontCamber_def"])
     SetRearTrackWidth(vehicle, Entity(vehicle).state["stance:rearWidth_def"])
     SetRearCamber(vehicle, Entity(vehicle).state["stance:rearCamber_def"])
+    SetWheelsSize(vehicle, Entity(vehicle).state["stance:wheelSize_def"])
     SetVehicleSuspensionHeight(vehicle, 0.0)
 end
 
@@ -308,17 +374,24 @@ function SetStateBag(vehicle, name, value)
     TriggerServerEvent('d-stance:server:setStateBag', NetworkGetNetworkIdFromEntity(vehicle), name, value)
 end
 
+function EnsureStanceStateBag(vehicle)
+    if not Entity(vehicle).state["stance:active"] then
+        SaveDefaultWheelPreset(vehicle)
+        SetStateBag(vehicle, "stance:active", true)
+    end
+end
+
 if DEBUG then
     RegisterCommand('stance:data', function()
         local vehicle = GetVehiclePedIsIn(playerPed)
         PrintWheelsPreset(vehicle)
-    end)
+    end, false)
     
     RegisterCommand('stance:default', function()
         local vehicle = GetVehiclePedIsIn(playerPed)
         ResetWheelsPreset(vehicle)
         PrintWheelsPreset(vehicle)
-    end)
+    end, false)
     
     RegisterCommand('stance:set', function(source, args)
         local vehicle = GetVehiclePedIsIn(playerPed)
@@ -328,7 +401,7 @@ if DEBUG then
             rearWidth = tonumber(args[3]),
             rearCamber = tonumber(args[4]),
         })
-    end)
+    end, false)
 
     RegisterCommand('stance:statebag', function(source, args)
         local vehicle = GetVehiclePedIsIn(playerPed)
@@ -338,7 +411,7 @@ if DEBUG then
         print(("[DEBUG] frontCamber %s"):format(stance.frontCamber))
         print(("[DEBUG] rearCamber %s"):format(stance.rearCamber))
         print(("[DEBUG] suspensionHeight %s"):format(stance.suspensionHeight))
-    end)
+    end, false)
 end
 
 exports('GetFrontTrackWidth', GetFrontTrackWidth)
@@ -351,6 +424,8 @@ exports('GetRearTrackWidth', GetRearTrackWidth)
 exports('SetRearTrackWidth', SetRearTrackWidth)
 exports('GetRearCamber', GetRearCamber)
 exports('SetRearCamber', SetRearCamber)
+--exports('GetWheelsSize', GetWheelsSize)
+exports('SetWheelsSize', SetWheelsSize)
 exports('GetWheelsPresetFromStateBag', GetWheelsPresetFromStateBag)
 exports('GetDefaultWheelPreset', GetDefaultWheelPreset)
 exports('GetWheelsPreset', GetWheelsPreset)
