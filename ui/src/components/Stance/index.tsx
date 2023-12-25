@@ -1,7 +1,8 @@
-import { Paper, Title, Button } from '@mantine/core'
+import { Paper, Title, Button, Flex, Text } from '@mantine/core'
+import { modals } from '@mantine/modals'
 import React, { useState, useContext } from 'react'
 import SliderContainer from '../SliderContainer'
-import { IconDeviceFloppy, IconCheck, IconArrowBack } from '@tabler/icons-react'
+import { IconDeviceFloppy, IconCheck, IconArrowBack, IconCircleXFilled } from '@tabler/icons-react'
 import { DataContextType } from '../../@types/context'
 import { DataContext } from '../../context/Data'
 import useApi from '../../hooks/useApi'
@@ -24,10 +25,28 @@ const Stance: React.FC = () => {
     api({ type: 'reset' })
   }
 
+  const openCloseDialog = () => modals.openConfirmModal({
+    title: 'Do you really want to exit stance menu?',
+    centered: true,
+    children: (
+      <Text size="sm">
+        By closing menu you will lose the current settings set in the menu, the defaults will be loaded after exiting the menu.
+      </Text>
+    ),
+    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+    onCancel: () => console.log('Cancel'),
+    onConfirm: () => console.log('Confirmed'),
+  });
+
   return (
     <div className='Stance'>
       <Paper withBorder p="lg" radius="md" shadow="md">
-        <Title order={3}>Stance</Title>
+        <Flex>
+          <Title order={3}>Stance</Title>
+          <Button onClick={openCloseDialog}>
+            <IconCircleXFilled className='m-auto' />
+          </Button>
+        </Flex>
         <hr />
 
         {stanceOptions.map((option: any, _: number) => <SliderContainer key={option.name} {...option} />)}

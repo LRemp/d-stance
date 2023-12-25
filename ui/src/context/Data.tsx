@@ -25,7 +25,7 @@ const DataContextProvider: React.FC<ComponentProps> = ({ children }) => {
   }
   const setVisible = (value: boolean) => setData((state) => ({ ...state, visible: value }))
   const [data, setData] = React.useState({
-    visible: false,
+    visible: true,
     setVisible,
     stanceOptions: [
       {
