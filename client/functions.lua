@@ -28,3 +28,9 @@ function GetMenuValues(Vehicle)
     values.rearWidth = (preset.rearWidth - defaultPreset.rearWidth) / Config.Limits.rearWidth
     return values
 end
+
+function LoadVehiclePreset(vehicle)
+    TriggerServerEvent('d-stance:loadVehiclePreset', vehicle)
+end
+
+export(LoadVehiclePreset, "LoadVehiclePreset")
